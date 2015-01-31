@@ -3,10 +3,9 @@ use strict;
 use warnings;
 use autodie;
 
-binmode(STDOUT, ":utf8");
-
-my $format_str = q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
-my @gitlog =  `git log -p --format='$format_str' @ARGV`;
+my $format_str =
+q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
+my @gitlog = `git log -p --format='$format_str' @ARGV`;
 
 sub html_escape {
     my ($text) = @_;
@@ -62,7 +61,6 @@ my %states = (
         if (/^\^{3} $hash \^{3}$/) {
             $state = 'diff';
             print "  <code>\n";
-            #scalar <$gitlog>;    # Ignore the next (blank) line
         } else {
             chomp;
             if ($_) {
@@ -77,6 +75,6 @@ $states{'start'} = $states{'diff'};
 
 # Execute the state machine
 foreach (@gitlog) {
-	$states{$state}->()
+    $states{$state}->();
 }
 end_item();
