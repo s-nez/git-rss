@@ -4,17 +4,9 @@ use warnings;
 use autodie;
 
 binmode(STDOUT, ":utf8");
-$| = 1;
-
-sub oexec(@) {
-    open(my $command, '-|') or do { close STDERR; exec @_ };
-    binmode($command, ":utf8");
-    return $command;
-}
 
 my $format_str = q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
-#my $gitlog = oexec qw( git log -p ), "--format=$format_str", @ARGV;
-my @gitlog =  `git log -p --format=$format_str @ARGV`;
+my @gitlog =  `git log -p --format='$format_str' @ARGV`;
 
 sub html_escape {
     my ($text) = @_;
@@ -70,7 +62,7 @@ my %states = (
         if (/^\^{3} $hash \^{3}$/) {
             $state = 'diff';
             print "  <code>\n";
-            scalar <$gitlog>;    # Ignore the next (blank) line
+            #scalar <$gitlog>;    # Ignore the next (blank) line
         } else {
             chomp;
             if ($_) {
@@ -84,6 +76,7 @@ my %states = (
 $states{'start'} = $states{'diff'};
 
 # Execute the state machine
-#while (<$gitlog>) { $states{$state}->() }
-foreach (@gitlog) { $states{$state}->() }
+foreach (@gitlog) {
+	$states{$state}->()
+}
 end_item();
