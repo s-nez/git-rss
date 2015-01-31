@@ -8,7 +8,8 @@ use POSIX qw( strftime );
 binmode(STDOUT, ":utf8");
 $| = 1;
 
-sub sqx(@) {
+# Get a command output and clear it if it only contains whitespace
+sub cmd_output(@) {
     my $result = `@_`;
     chomp $result;
     $result =~ s/^\s+$//g;
@@ -25,18 +26,18 @@ sub html_escape {
 
 my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
 
-my $last = sqx qw( git log --max-count=1 --format=%aD ), @ARGV;
+my $last = cmd_output qw( git log --max-count=1 --format=%aD ), @ARGV;
 
-my $name = basename(sqx qw( git rev-parse --show-toplevel ));
+my $name = basename(cmd_output qw( git rev-parse --show-toplevel ));
 
-my @remotes = split /\n/, sqx qw( git remote -v );
+my @remotes = split /\n/, cmd_output qw( git remote -v );
 my %remotes;
 foreach (@remotes) {
     my ($name, $location, $kind) = /^([^\t]+)\t(.+?) \((\w+)\)/;
     $remotes{$name}{$kind} = $location;
 }
 
-my ($branch) = sqx(qw( git symbolic-ref HEAD )) =~ m{([^/]+)$};
+my ($branch) = cmd_output(qw( git symbolic-ref HEAD )) =~ m{([^/]+)$};
 if ($branch) {
     $name .= " [$branch]";
 }
