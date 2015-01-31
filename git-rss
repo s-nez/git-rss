@@ -62,8 +62,8 @@ if (exists $remotes{'origin'}{'fetch'}) {
     print "  <link>" . html_escape($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
-my $items = `./git-rss-items @ARGV`;
-print $items;
+my @items = `./git-rss-items @ARGV`;
+print "  $_" foreach (@items);
 
 print << 'EORSS'
  </channel>
