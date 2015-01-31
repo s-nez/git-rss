@@ -12,8 +12,7 @@ sub oexec(@) {
     return $command;
 }
 
-my $format_str =
-q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
+my $format_str = q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
 my $gitlog = oexec qw( git log -p ), "--format=$format_str", @ARGV;
 
 sub html_escape {
@@ -34,6 +33,7 @@ sub end_item {
         print "</item>\n";
     }
 }
+
 my %states = (
     diff => sub {
         if (/^vvv ([A-Fa-f0-9]+) vvv$/) {

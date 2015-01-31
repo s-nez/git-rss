@@ -6,7 +6,6 @@ use File::Basename qw( basename );
 use POSIX qw( strftime );
 
 binmode(STDOUT, ":utf8");
-$| = 1;
 
 # Get a command output and clear it if it only contains whitespace
 sub cmd_output(@) {
