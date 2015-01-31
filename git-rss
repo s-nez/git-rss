@@ -15,10 +15,9 @@ sub oexec(@) {
 }
 
 sub sqx(@) {
-    my $command = oexec @_;
-    local $/ = undef;
-    my $result = scalar <$command>;
-    $result =~ s/^\s+|\s+$//g;
+	my $result = `@_`;
+	chomp $result;
+    $result =~ s/^\s+$//g;
     return $result;
 }
 
