@@ -8,12 +8,6 @@ use POSIX qw( strftime );
 binmode(STDOUT, ":utf8");
 $| = 1;
 
-sub oexec(@) {
-    open(my $command, '-|') or do { close STDERR; exec @_ };
-    binmode($command, ":utf8");
-    return $command;
-}
-
 sub sqx(@) {
     my $result = `@_`;
     chomp $result;
