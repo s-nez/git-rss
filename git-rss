@@ -63,9 +63,7 @@ if (exists $remotes{'origin'}{'fetch'}) {
 }
 
 my $items = `./git-rss-items @ARGV`;
-while (<$items>) {
-    print "  $_";
-}
+print $items;
 
 print << 'EORSS'
  </channel>
