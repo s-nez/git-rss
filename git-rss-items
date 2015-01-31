@@ -3,20 +3,21 @@ use strict;
 use warnings;
 use autodie;
 
-binmode(STDOUT,":utf8");
-$|=1;
+binmode(STDOUT, ":utf8");
+$| = 1;
 
 sub oexec(@) {
-    open( my $command, '-|' ) or do { close STDERR; exec @_ };
-    binmode($command,":utf8");
+    open(my $command, '-|') or do { close STDERR; exec @_ };
+    binmode($command, ":utf8");
     return $command;
 }
 
-my $format_str = q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
+my $format_str =
+q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
 my $gitlog = oexec qw( git log -p ), "--format=$format_str", @ARGV;
 
 sub html_escape {
-    my($text) = @_;
+    my ($text) = @_;
     $text =~ s/&/&amp;/g;
     $text =~ s/</&lt;/g;
     $text =~ s/>/&gt;/g;
@@ -24,67 +25,63 @@ sub html_escape {
 }
 
 my $state = 'start';
-my $hash = '';
+my $hash  = '';
+
 sub end_item {
-    if ( $state eq 'diff' ) {
+    if ($state eq 'diff') {
         print "  </code>]]>\n";
         print " </description>\n";
         print "</item>\n";
     }
 }
 my %states = (
-    diff  => sub {
+    diff => sub {
         if (/^vvv ([A-Fa-f0-9]+) vvv$/) {
             $hash = $1;
             end_item();
             $state = 'item';
-        }
-        else {
+        } else {
             chomp;
             $_ = html_escape($_);
             if (/^-/) {
                 $_ = qq{<font color="#aa0000">$_</font>};
-            }
-            elsif (/^\+/) {
+            } elsif (/^\+/) {
                 $_ = qq{<font color="#00aa00">$_</font>};
-            }
-            elsif (/^===/) {
+            } elsif (/^===/) {
+                $_ = qq{<font color="#aaaa00">$_</font>};
+            } elsif (/^Index/) {
                 $_ = qq{<font color="#aaaa00">$_</font>};
             }
-            elsif (/^Index/) {
-                $_ = qq{<font color="#aaaa00">$_</font>};
-            }        
             s/\t/    /g;
             s{\r}{<font color="#ffffff">^M</font>}g;
             s/^ /&nbsp;/;
             s/  / &nbsp;/g;
-            print "  ",$_,"<br>\n";
+            print "  ", $_, "<br>\n";
         }
     },
-    item  => sub {
+    item => sub {
         print;
         if (/^ <description>/) {
-             $state = 'desc';
+            $state = 'desc';
         }
     },
-    desc  => sub {
-        if ( /^\^{3} $hash \^{3}$/) {
+    desc => sub {
+        if (/^\^{3} $hash \^{3}$/) {
             $state = 'diff';
             print "  <code>\n";
-            scalar <$gitlog>; # Ignore the next (blank) line
-        }
-        else {
+            scalar <$gitlog>;    # Ignore the next (blank) line
+        } else {
             chomp;
             if ($_) {
-                print "  <tt>",html_escape($_),"</tt><br>\n";
-            }
-            else {
+                print "  <tt>", html_escape($_), "</tt><br>\n";
+            } else {
                 print "  <br>\n";
             }
         }
-    });
+    }
+);
 $states{'start'} = $states{'diff'};
 
-# Execute the state machine    
-while ( <$gitlog> ) { $states{$state}->() }
+# Execute the state machine
+while (<$gitlog>) { $states{$state}->() }
 end_item();
