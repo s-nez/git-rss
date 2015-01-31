@@ -5,45 +5,45 @@ use autodie;
 use File::Basename qw( basename );
 use POSIX qw( strftime );
 
-binmode(STDOUT,":utf8");
-$|=1;
+binmode(STDOUT, ":utf8");
+$| = 1;
 
 sub oexec(@) {
-    open( my $command, '-|' ) or do { close STDERR; exec @_ };
-    binmode($command,":utf8");
+    open(my $command, '-|') or do { close STDERR; exec @_ };
+    binmode($command, ":utf8");
     return $command;
 }
 
 sub sqx(@) {
-	my $result = `@_`;
-	chomp $result;
+    my $result = `@_`;
+    chomp $result;
     $result =~ s/^\s+$//g;
     return $result;
 }
 
 sub html_escape {
-    my($text) = @_;
+    my ($text) = @_;
     $text =~ s/&/&amp;/g;
     $text =~ s/</&lt;/g;
     $text =~ s/>/&gt;/g;
     return $text;
 }
 
-my $now = strftime("%a, %d %b %Y %H:%m:%S %z",gmtime());
+my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
 
 my $last = sqx qw( git log --max-count=1 --format=%aD ), @ARGV;
 
-my $name = basename( sqx qw( git rev-parse --show-toplevel ) );
+my $name = basename(sqx qw( git rev-parse --show-toplevel ));
 
 my @remotes = split /\n/, sqx qw( git remote -v );
 my %remotes;
 foreach (@remotes) {
-    my($name,$location,$kind) = /^([^\t]+)\t(.+?) \((\w+)\)/;
+    my ($name, $location, $kind) = /^([^\t]+)\t(.+?) \((\w+)\)/;
     $remotes{$name}{$kind} = $location;
 }
 
-my($branch) = sqx( qw( git symbolic-ref HEAD ) ) =~ m{([^/]+)$};
-if ( $branch ) {
+my ($branch) = sqx(qw( git symbolic-ref HEAD )) =~ m{([^/]+)$};
+if ($branch) {
     $name .= " [$branch]";
 }
 
@@ -58,15 +58,14 @@ print << "EORSS";
   <ttl>60</ttl>
 EORSS
 
-if ( exists $remotes{'origin'}{'fetch'} ) {
-    print "  <link>".html_escape($remotes{'origin'}{'fetch'})."</link>\n";
+if (exists $remotes{'origin'}{'fetch'}) {
+    print "  <link>" . html_escape($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
-my $items = oexec qw( git rss-items ), @ARGV;
+my $items = `./git-rss-items @ARGV`;
 while (<$items>) {
     print "  $_";
 }
-close $items;
 
 print << 'EORSS'
  </channel>
