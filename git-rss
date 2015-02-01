@@ -9,9 +9,9 @@ use Git_RSS_Items;
 
 # Get a command output and clear it if it only contains whitespace
 sub cmd_output(@) {
-	my $result = `@_`;
-	chomp $result;
-	return ($result !~ /^\s+$/) ? $result : '';
+    my $result = `@_`;
+    chomp $result;
+    return ($result !~ /^\s+$/) ? $result : '';
 }
 
 my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
