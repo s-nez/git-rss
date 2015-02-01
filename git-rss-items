@@ -5,7 +5,13 @@ use autodie;
 use HTML::Escape 'escape_html';
 
 my $format_str =
-q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
+    'vvv %H vvv%n<item>%n '
+  . '<guid>%H</guid>%n '
+  . '<title><![CDATA[%h %s]]></title>%n '
+  . '<author>%aE (%aN)</author>%n '
+  . '<pubDate>%aD</pubDate>%n '
+  . '<description><![CDATA[%n%B%n'
+  . '^^^ %H ^^^';
 my @gitlog = `git log -p --format='$format_str' @ARGV`;
 
 my $state = 'start';
