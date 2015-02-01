@@ -5,3 +5,5 @@ An RSS extension for git.  This works just like git log, but it produces RSS fee
 Produced RSS includes, in addition the the usual author, date, subject and
 body, full color coded diffs.
 
+# Dependencies
+* [HTML::Escape](https://metacpan.org/pod/HTML::Escape)
