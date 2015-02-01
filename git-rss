@@ -9,8 +9,7 @@ use POSIX qw( strftime );
 sub cmd_output(@) {
     my $result = `@_`;
     chomp $result;
-    $result =~ s/^\s+$//g;
-    return $result;
+	return ($result !~ /^\s+$/) ? $result : '';
 }
 
 sub html_escape {
