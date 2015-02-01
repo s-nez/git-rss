@@ -2,18 +2,11 @@
 use strict;
 use warnings;
 use autodie;
+use HTML::Escape 'escape_html';
 
 my $format_str =
 q{vvv %H vvv%n<item>%n <guid>%H</guid>%n <title><![CDATA[%h %s]]></title>%n <author>%aE (%aN)</author>%n <pubDate>%aD</pubDate>%n <description><![CDATA[%n%B%n^^^ %H ^^^};
 my @gitlog = `git log -p --format='$format_str' @ARGV`;
-
-sub html_escape {
-    my ($text) = @_;
-    $text =~ s/&/&amp;/g;
-    $text =~ s/</&lt;/g;
-    $text =~ s/>/&gt;/g;
-    return $text;
-}
 
 my $state = 'start';
 my $hash  = '';
@@ -34,7 +27,7 @@ my %states = (
             $state = 'item';
         } else {
             chomp;
-            $_ = html_escape($_);
+            $_ = escape_html($_);
             if (/^-/) {
                 $_ = qq{<font color="#aa0000">$_</font>};
             } elsif (/^\+/) {
@@ -64,7 +57,7 @@ my %states = (
         } else {
             chomp;
             if ($_) {
-                print "  <tt>", html_escape($_), "</tt><br>\n";
+                print "  <tt>", escape_html($_), "</tt><br>\n";
             } else {
                 print "  <br>\n";
             }

@@ -4,20 +4,13 @@ use warnings;
 use autodie;
 use File::Basename qw( basename );
 use POSIX qw( strftime );
+use HTML::Escape 'escape_html';
 
 # Get a command output and clear it if it only contains whitespace
 sub cmd_output(@) {
     my $result = `@_`;
     chomp $result;
 	return ($result !~ /^\s+$/) ? $result : '';
-}
-
-sub html_escape {
-    my ($text) = @_;
-    $text =~ s/&/&amp;/g;
-    $text =~ s/</&lt;/g;
-    $text =~ s/>/&gt;/g;
-    return $text;
 }
 
 my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
@@ -50,7 +43,7 @@ print << "EORSS";
 EORSS
 
 if (exists $remotes{'origin'}{'fetch'}) {
-    print "  <link>" . html_escape($remotes{'origin'}{'fetch'}) . "</link>\n";
+    print "  <link>" . escape_html($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
 my @items = `./git-rss-items @ARGV`;
