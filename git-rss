@@ -5,6 +5,7 @@ use autodie;
 use File::Basename qw( basename );
 use POSIX qw( strftime );
 use HTML::Escape 'escape_html';
+use Git_RSS_Items;
 
 # Get a command output and clear it if it only contains whitespace
 sub cmd_output(@) {
@@ -46,7 +47,8 @@ if (exists $remotes{'origin'}{'fetch'}) {
     print "  <link>" . escape_html($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
-my @items = `./git-rss-items @ARGV`;
+#my @items = `./git-rss-items @ARGV`;
+my @items = git_items(@ARGV);
 print "  $_" foreach (@items);
 
 print << 'EORSS'
