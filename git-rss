@@ -11,7 +11,7 @@ use Git_RSS_Items;
 sub cmd_output(@) {
 	my $result = `@_`;
 	chomp $result;
-    return ($result !~ /^\s+$/) ? $result : '';
+	return ($result !~ /^\s+$/) ? $result : '';
 }
 
 my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
