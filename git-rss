@@ -5,6 +5,8 @@ use autodie;
 use File::Basename qw( basename );
 use POSIX qw( strftime );
 use HTML::Escape 'escape_html';
+use FindBin;
+use lib $FindBin::Bin;
 use Git_RSS_Items;
 
 # Get a command output and clear it if it only contains whitespace
