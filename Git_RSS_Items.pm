@@ -37,6 +37,9 @@ my %states = (
                 $content = qq{<font color="#aaaa00">$content</font>};
             } elsif ($content =~ /^Index/) {
                 $content = qq{<font color="#aaaa00">$content</font>};
+            } elsif ($content =~ /^@@/) {
+                $content =~
+s|(@@ -?\d+(?:,\d+)? \+\d+(?:,\d+)? @@)|<font color="#0000aa">$1</font>|;
             }
             $content =~ s/\t/    /g;
             $content =~ s{\r}{<font color="#ffffff">^M</font>}g;
