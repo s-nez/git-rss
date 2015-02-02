@@ -7,62 +7,68 @@ use HTML::Escape 'escape_html';
 use Exporter 'import';
 our @EXPORT = qw(git_items);
 
-my $state = 'start'; # Initial state
+my $state = 'start';    # Initial state
 my $hash  = '';
 
-sub end_item {
+sub end_item(\@) {
+    my ($buffer) = @_;
     if ($state eq 'diff') {
-        print "  </code>]]>\n";
-        print " </description>\n";
-        print "</item>\n";
+        push @{$buffer}, "  </code>]]>\n";
+        push @{$buffer}, " </description>\n";
+        push @{$buffer}, "</item>\n";
     }
 }
 
 my %states = (
-    diff => sub {
-        if (/^vvv ([A-Fa-f0-9]+) vvv$/) {
+    diff => sub(\@$) {
+        my ($buffer, $content) = @_;
+        if ($content =~ /^vvv ([A-Fa-f0-9]+) vvv$/) {
             $hash = $1;
-            end_item();
+            end_item(@{$buffer});
             $state = 'item';
         } else {
-            chomp;
-            $_ = escape_html($_);
-            if (/^-/) {
-                $_ = qq{<font color="#aa0000">$_</font>};
-            } elsif (/^\+/) {
-                $_ = qq{<font color="#00aa00">$_</font>};
-            } elsif (/^===/) {
-                $_ = qq{<font color="#aaaa00">$_</font>};
-            } elsif (/^Index/) {
-                $_ = qq{<font color="#aaaa00">$_</font>};
+            chomp $content;
+            $content = escape_html($content);
+            if ($content =~ /^-/) {
+                $content = qq{<font color="#aa0000">$content</font>};
+            } elsif ($content =~ /^\+/) {
+                $content = qq{<font color="#00aa00">$content</font>};
+            } elsif ($content =~ /^===/) {
+                $content = qq{<font color="#aaaa00">$content</font>};
+            } elsif ($content =~ /^Index/) {
+                $content = qq{<font color="#aaaa00">$content</font>};
             }
-            s/\t/    /g;
-            s{\r}{<font color="#ffffff">^M</font>}g;
-            s/^ /&nbsp;/;
-            s/  / &nbsp;/g;
-            print "  ", $_, "<br>\n";
+            $content =~ s/\t/    /g;
+            $content =~ s{\r}{<font color="#ffffff">^M</font>}g;
+            $content =~ s/^ /&nbsp;/;
+            $content =~ s/  / &nbsp;/g;
+            push @{$buffer}, "  " . $content . "<br>\n";
         }
     },
-    item => sub {
-        print;
-        if (/^ <description>/) {
+    item => sub(\@$) {
+        my ($buffer, $content) = @_;
+        push @{$buffer}, $content;
+        if ($content =~ /^ <description>/) {
             $state = 'desc';
         }
     },
-    desc => sub {
-        if (/^\^{3} $hash \^{3}$/) {
+    desc => sub(\@$) {
+        my ($buffer, $content) = @_;
+        if ($content =~ /^\^{3} $hash \^{3}$/) {
             $state = 'diff';
-            print "  <code>\n";
+            push @{$buffer}, "  <code>\n";
         } else {
-            chomp;
-            if ($_) {
-                print "  <tt>", escape_html($_), "</tt><br>\n";
+            chomp $content;
+            if ($content) {
+                push @{$buffer},
+                  "  <tt>" . escape_html($content) . "</tt><br>\n";
             } else {
-                print "  <br>\n";
+                push @{$buffer}, "  <br>\n";
             }
         }
     }
 );
+$states{'start'} = $states{'diff'};
 
 # Format string for git log
 my $format_str =
@@ -75,12 +81,14 @@ my $format_str =
   . '^^^ %H ^^^';
 
 sub git_items {
-	my @gitlog = `git log -p --format='$format_str' @_`;
-    $states{'start'} = $states{'diff'};
+    my @gitlog = `git log -p --format='$format_str' @_`;
+
+    my @result;
 
     # Execute the state machine
-    foreach (@gitlog) {
-        $states{$state}->();
+    foreach my $line (@gitlog) {
+        $states{$state}->(\@result, $line);
     }
-    end_item();
+    end_item(@result);
+    return @result;
 }

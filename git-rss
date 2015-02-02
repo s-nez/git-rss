@@ -47,7 +47,6 @@ if (exists $remotes{'origin'}{'fetch'}) {
     print "  <link>" . escape_html($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
-#my @items = `./git-rss-items @ARGV`;
 my @items = git_items(@ARGV);
 print "  $_" foreach (@items);
 
