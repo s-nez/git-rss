@@ -9,7 +9,7 @@ use FindBin;
 use lib $FindBin::Bin;
 use Git_RSS_Items;
 
-# Get a command output and clear it if it only contains whitespace
+# Get a command output, returns empty string if the output is whitespace-only
 sub cmd_output(@) {
     my $result = `@_`;
     chomp $result;
