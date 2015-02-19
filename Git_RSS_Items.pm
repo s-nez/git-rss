@@ -93,5 +93,5 @@ sub git_items {
         $states{$state}->(\@result, $line);
     }
     end_item(@result);
-    return @result;
+    return \@result;
 }

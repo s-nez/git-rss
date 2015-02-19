@@ -17,9 +17,7 @@ sub cmd_output(@) {
 }
 
 my $now = strftime("%a, %d %b %Y %H:%m:%S %z", gmtime());
-
 my $last = cmd_output qw( git log --max-count=1 --format=%aD ), @ARGV;
-
 my $name = basename(cmd_output qw( git rev-parse --show-toplevel ));
 
 my @remotes = split /\n/, cmd_output qw( git remote -v );
@@ -49,8 +47,8 @@ if (exists $remotes{'origin'}{'fetch'}) {
     print "  <link>" . escape_html($remotes{'origin'}{'fetch'}) . "</link>\n";
 }
 
-my @items = git_items(@ARGV);
-print "  $_" foreach (@items);
+my $items = git_items(@ARGV);
+print "  $_" foreach (@$items);
 
 print << 'EORSS'
  </channel>
