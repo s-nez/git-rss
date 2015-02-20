@@ -84,7 +84,7 @@ my $format_str =
   . '^^^ %H ^^^';
 
 sub git_items {
-    my @gitlog = `git log -p --format='$format_str' @_`;
+    my @gitlog = `git log --format='$format_str' @_`;
 
     my @result;
 
